@@ -1,7 +1,11 @@
 import os
 from google import genai  # type: ignore
+from google.genai import types  # type: ignore
 from dotenv import load_dotenv  # type: ignore
 import argparse
+
+def create_message(role, text):
+    return types.Content(role=role, parts=[types.Part(text=text)])
 
 def main():
     print("Hello from aiagent!")
@@ -16,8 +20,10 @@ def main():
     # Now we can access `args.user_prompt`
 
     client = genai.Client(api_key=api_key)
+    
+    messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
 
-    response = client.models.generate_content(model="gemini-3-flash-preview", contents=args.user_prompt)
+    response = client.models.generate_content(model="gemini-3-flash-preview", contents=messages)
     if response.usage_metadata is None:
         raise RuntimeError("usage metadata not found")
     
