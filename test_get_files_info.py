@@ -16,7 +16,7 @@
 # Result for '../' directory:
 # Error Cannot list "../" as it is outside the permitted working directory
 import os
-from get_files_info import get_files_info
+from functions.get_files_info import get_files_info
 current_dir_result = get_files_info("calculator", ".")
 print(f"Results for current directory:\n{current_dir_result}")
 pkg_dir_result = get_files_info("calculator", "pkg")
