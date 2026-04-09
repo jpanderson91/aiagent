@@ -1,4 +1,26 @@
 import os
+from google import genai  # type: ignore
+from google.genai import types  # type: ignore
+
+schema_write_file = types.FunctionDeclaration(
+    name="write_file",
+    description="Writes content to a specified file relative to the working directory, creating parent directories as needed",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Path to the file to write, relative to the working directory",
+            ),
+            "content": types.Schema(
+                type=types.Type.STRING,
+                description="Content to write to the file",
+            ),
+        },
+        required=["file_path", "content"],
+    ),
+)
+
 def write_file(working_directory, file_path, content):
     # if the file_path is outside the working_directory, return an error string  like the one below:
     # f'Error: Cannot write to "{file_path}" as it is outside the permitted working directory'
