@@ -4,7 +4,8 @@ from google.genai import types  # type: ignore
 from dotenv import load_dotenv  # type: ignore
 import argparse
 from prompts import system_prompt # type: ignore
-from call_function import available_functions # type: ignore
+from functions.call_function import available_functions # type: ignore
+from functions.call_function import call_function # type: ignore
 
 
 def create_message(role, text):
@@ -44,7 +45,18 @@ def main():
         print (f"Response tokens: {response.usage_metadata.candidates_token_count}")
         print (response.text)
     if response.function_calls != None:
+        function_result_list = []
         for function_call in response.function_calls:
+            function_call_result = call_function(function_call, verbose=args.verbose)
+            if function_call_result.parts == None:
+                raise Exception("parts list empty")
+            if function_call_result.parts[0].function_response == None:
+                raise Exception("no function response object")
+            if function_call_result.parts[0].function_response.response == None:
+                raise Exception("no function result")
+            function_result_list.append(function_call_result.parts[0])
+            if args.verbose:
+                print(f"-> {function_call_result.parts[0].function_response.response}")
             print (f"Calling function: {function_call.name}({function_call.args})") 
     else:
         print (response.text)
