@@ -5,7 +5,7 @@ from google.genai import types  # type: ignore
 
 schema_run_python_file = types.FunctionDeclaration(
     name="run_python_file",
-    description="Executes a Python file relative to the working directory with optional arguments and returns the output",
+    description="Executes a Python file as a subprocess and returns its output. Use this when the user asks to run, execute, or test a Python script",
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
