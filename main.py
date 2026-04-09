@@ -3,6 +3,7 @@ from google import genai  # type: ignore
 from google.genai import types  # type: ignore
 from dotenv import load_dotenv  # type: ignore
 import argparse
+from prompts import system_prompt
 
 def create_message(role, text):
     return types.Content(role=role, parts=[types.Part(text=text)])
@@ -24,7 +25,11 @@ def main():
     
     messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
 
-    response = client.models.generate_content(model="gemini-3-flash-preview", contents=messages)
+    response = client.models.generate_content(
+        model="gemini-3-flash-preview",
+        contents=messages,
+        config=types.GenerateContentConfig(system_instruction=system_prompt),
+        )
     
     if response.usage_metadata is None:
         raise RuntimeError("usage metadata not found")
