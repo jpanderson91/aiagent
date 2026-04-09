@@ -27,39 +27,46 @@ def main():
     client = genai.Client(api_key=api_key)
     
     messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
-
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=messages,
-        config=types.GenerateContentConfig(
-            tools=[available_functions], system_instruction=system_prompt
-            ),
-        )
-    
-    if response.usage_metadata is None:
-        raise RuntimeError("usage metadata not found")
-    
-    if args.verbose:
-        print (f"User prompt: {args.user_prompt}")
-        print (f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-        print (f"Response tokens: {response.usage_metadata.candidates_token_count}")
-        print (response.text)
-    if response.function_calls != None:
-        function_result_list = []
-        for function_call in response.function_calls:
-            function_call_result = call_function(function_call, verbose=args.verbose)
-            if function_call_result.parts == None:
-                raise Exception("parts list empty")
-            if function_call_result.parts[0].function_response == None:
-                raise Exception("no function response object")
-            if function_call_result.parts[0].function_response.response == None:
-                raise Exception("no function result")
-            function_result_list.append(function_call_result.parts[0])
-            if args.verbose:
-                print(f"-> {function_call_result.parts[0].function_response.response}")
-            print (f"Calling function: {function_call.name}({function_call.args})") 
+    for _ in range(20):
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=messages,
+            config=types.GenerateContentConfig(
+                tools=[available_functions], system_instruction=system_prompt
+                ),
+            )
+        if response.candidates != None:
+            messages.append(response.candidates[0].content)
+        
+        if response.usage_metadata is None:
+            raise RuntimeError("usage metadata not found")
+        
+        if args.verbose:
+            print (f"User prompt: {args.user_prompt}")
+            print (f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+            print (f"Response tokens: {response.usage_metadata.candidates_token_count}")
+            print (response.text)
+        if response.function_calls != None:
+            function_result_list = []
+            for function_call in response.function_calls:
+                function_call_result = call_function(function_call, verbose=args.verbose)
+                if function_call_result.parts == None:
+                    raise Exception("parts list empty")
+                if function_call_result.parts[0].function_response == None:
+                    raise Exception("no function response object")
+                if function_call_result.parts[0].function_response.response == None:
+                    raise Exception("no function result")
+                function_result_list.append(function_call_result.parts[0])
+                if args.verbose:
+                    print(f"-> {function_call_result.parts[0].function_response.response}")
+                print (f"Calling function: {function_call.name}({function_call.args})") 
+            messages.append(types.Content(role="tool", parts=function_result_list))
+        else:
+            print (response.text)
+            break
     else:
-        print (response.text)
+        print("Max iterations reached without a final response.")
+        exit(1) 
 
 if __name__ == "__main__":
     main()
