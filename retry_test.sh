@@ -4,7 +4,7 @@ ATTEMPT=1
 
 while [ $ATTEMPT -le $MAX_RETRIES ]; do
     echo "=== Attempt $ATTEMPT of $MAX_RETRIES ==="
-    OUTPUT=$(bootdev run ad0f349e-4426-4658-b3f5-7e7bbce2ae48 -s 2>&1)
+    OUTPUT=$(bootdev run e457f633-6cbf-44bd-9eec-8a938f8db13a -s 2>&1)
     echo "$OUTPUT"
     
     if echo "$OUTPUT" | grep -q "503 UNAVAILABLE"; then
